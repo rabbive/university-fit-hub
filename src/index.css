@@ -134,11 +134,11 @@
   }
 
   .glass-hover {
-    @apply glass transition-all duration-300 hover:bg-card/90 hover:border-primary/30;
+    @apply glass transition-all duration-300 hover:bg-card/90 hover:border-primary/30 hover:shadow-lg;
   }
 
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto];
   }
 
   .gradient-border {
@@ -161,6 +161,54 @@
   .glow-accent {
     @apply shadow-[0_0_30px_rgba(52,211,153,0.3)];
   }
+
+  .glow-warning {
+    @apply shadow-[0_0_30px_rgba(251,191,36,0.3)];
+  }
+
+  .shimmer {
+    @apply relative overflow-hidden;
+  }
+
+  .shimmer::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    animation: shimmer 2s infinite;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:translate-y-[-2px] hover:shadow-xl;
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  }
+
+  .text-gradient-warm {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-warning to-energy;
+  }
+
+  .border-gradient {
+    border-image: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent))) 1;
+  }
+
+  .bg-grid {
+    background-image: 
+      linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(circle, hsl(var(--primary) / 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
 }
 
 @layer utilities {
@@ -176,6 +224,18 @@
     background-size: 200% 200%;
     animation: gradient 8s ease infinite;
   }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
 }
 
 @keyframes float {
@@ -187,4 +247,18 @@
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.5); }
 }
