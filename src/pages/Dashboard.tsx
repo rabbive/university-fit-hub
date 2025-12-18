@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { 
@@ -168,13 +168,13 @@ const Dashboard = () => {
         <div className="mb-8">
           <h2 className="font-display text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button className="glass-hover rounded-2xl p-6 text-left group">
+            <Link to="/workout/log" className="glass-hover rounded-2xl p-6 text-left group">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                 <Dumbbell className="w-6 h-6 text-primary" />
               </div>
               <h3 className="font-semibold mb-1">Log Workout</h3>
               <p className="text-sm text-muted-foreground">Track your exercises and sets</p>
-            </button>
+            </Link>
             
             <button className="glass-hover rounded-2xl p-6 text-left group">
               <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
