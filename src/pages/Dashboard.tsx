@@ -26,6 +26,7 @@ import { AnimatedCard } from "@/components/animations/AnimatedCard";
 import { AnimatedCounter } from "@/components/animations/AnimatedCounter";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerContainer";
 import { FadeIn } from "@/components/animations/FadeIn";
+import { ActivityHeatmap } from "@/components/animations/ActivityHeatmap";
 
 interface RecentWorkout {
   id: string;
@@ -56,6 +57,7 @@ const Dashboard = () => {
   });
   const [recentWorkouts, setRecentWorkouts] = useState<RecentWorkout[]>([]);
   const [upcomingClasses, setUpcomingClasses] = useState<UpcomingClass[]>([]);
+  const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -150,6 +152,27 @@ const Dashboard = () => {
         .limit(3);
 
       setUpcomingClasses(upcomingData || []);
+
+      // Fetch activity data for heatmap (last 12 weeks)
+      const twelveWeeksAgo = new Date();
+      twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84);
+      
+      const { data: activityWorkouts } = await supabase
+        .from("workouts")
+        .select("completed_at")
+        .eq("user_id", userId)
+        .gte("completed_at", twelveWeeksAgo.toISOString());
+
+      if (activityWorkouts) {
+        const activityMap = new Map<string, number>();
+        activityWorkouts.forEach((w) => {
+          const date = w.completed_at.split("T")[0];
+          activityMap.set(date, (activityMap.get(date) || 0) + 1);
+        });
+        setActivityData(
+          Array.from(activityMap.entries()).map(([date, count]) => ({ date, count }))
+        );
+      }
 
       setStats({
         totalWorkouts: workoutCount || 0,
@@ -493,6 +516,16 @@ const Dashboard = () => {
             )}
           </div>
         </div>
+
+        {/* Activity Heatmap */}
+        <FadeIn delay={0.3} className="mt-8">
+          <div className="glass rounded-2xl p-6 border border-border/50">
+            <h3 className="font-display text-lg font-semibold text-foreground mb-4">
+              Workout Consistency
+            </h3>
+            <ActivityHeatmap data={activityData} weeks={12} />
+          </div>
+        </FadeIn>
       </main>
     </PageTransition>
   );
