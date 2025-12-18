@@ -15,7 +15,8 @@ import {
   Users,
   Swords,
   User,
-  ChevronRight
+  ChevronRight,
+  Heart
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
@@ -313,7 +314,7 @@ const Dashboard = () => {
         </div>
 
         {/* Secondary Actions */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <Link to="/gym-occupancy" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
             <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
               <Users className="w-5 h-5 text-accent" />
@@ -321,6 +322,17 @@ const Dashboard = () => {
             <div className="flex-1">
               <h3 className="font-medium text-foreground">Gym Status</h3>
               <p className="text-xs text-muted-foreground">Live occupancy</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          
+          <Link to="/buddy-matching" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
+            <div className="w-10 h-10 rounded-lg bg-pink-500/10 flex items-center justify-center">
+              <Heart className="w-5 h-5 text-pink-500" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Find Buddy</h3>
+              <p className="text-xs text-muted-foreground">Workout partners</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </Link>
