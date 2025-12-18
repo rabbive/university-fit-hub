@@ -212,7 +212,7 @@ const WorkoutLogger = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <Confetti active={showConfetti} />
+      <Confetti isActive={showConfetti} />
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
