@@ -11,7 +11,9 @@ import {
   Settings,
   Plus,
   ShieldAlert,
-  ClipboardList
+  ClipboardList,
+  Trophy,
+  Award
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
@@ -271,8 +273,24 @@ const AdminDashboard = () => {
 
         {/* Secondary Actions */}
         <div className="mb-8">
-          <h2 className="font-display text-xl font-semibold mb-4 text-foreground">More Options</h2>
+          <h2 className="font-display text-xl font-semibold mb-4 text-foreground">Gamification</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link to="/admin/challenges" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4 group-hover:bg-purple-500/20 transition-colors">
+                <Trophy className="w-6 h-6 text-purple-500" />
+              </div>
+              <h3 className="font-semibold mb-1 text-foreground">Challenges</h3>
+              <p className="text-sm text-muted-foreground">Create and manage challenges</p>
+            </Link>
+            
+            <Link to="/admin/achievements" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4 group-hover:bg-amber-500/20 transition-colors">
+                <Award className="w-6 h-6 text-amber-500" />
+              </div>
+              <h3 className="font-semibold mb-1 text-foreground">Achievements</h3>
+              <p className="text-sm text-muted-foreground">Manage badges and rewards</p>
+            </Link>
+            
             <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-4 group-hover:bg-muted transition-colors">
                 <Settings className="w-6 h-6 text-muted-foreground" />

@@ -10,6 +10,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserManagement from "./pages/UserManagement";
 import ClassManagement from "./pages/ClassManagement";
 import BookingManagement from "./pages/BookingManagement";
+import ChallengeManagement from "./pages/ChallengeManagement";
+import AchievementManagement from "./pages/AchievementManagement";
 import Analytics from "./pages/Analytics";
 import WorkoutLogger from "./pages/WorkoutLogger";
 import ClassBooking from "./pages/ClassBooking";
@@ -40,6 +42,8 @@ const App = () => (
           <Route path="/admin/classes" element={<ClassManagement />} />
           <Route path="/admin/analytics" element={<Analytics />} />
           <Route path="/admin/bookings" element={<BookingManagement />} />
+          <Route path="/admin/challenges" element={<ChallengeManagement />} />
+          <Route path="/admin/achievements" element={<AchievementManagement />} />
           <Route path="/workout/log" element={<WorkoutLogger />} />
           <Route path="/workout/history" element={<WorkoutHistory />} />
           <Route path="/classes" element={<ClassBooking />} />
