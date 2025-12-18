@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { 
@@ -9,7 +9,8 @@ import {
   Calendar,
   BarChart3,
   Settings,
-  Plus
+  Plus,
+  ShieldAlert
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
@@ -19,6 +20,7 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalClasses: 0,
@@ -40,12 +42,40 @@ const AdminDashboard = () => {
         navigate("/auth?role=admin");
       } else {
         setUser(session.user);
-        fetchStats();
+        checkAdminRole(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkAdminRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin'
+      });
+
+      if (error) throw error;
+      
+      if (data) {
+        setIsAdmin(true);
+        fetchStats();
+      } else {
+        setIsAdmin(false);
+        setLoading(false);
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin privileges.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error checking admin role:", error);
+      setIsAdmin(false);
+      setLoading(false);
+    }
+  };
 
   const fetchStats = async () => {
     try {
@@ -81,6 +111,31 @@ const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Access denied screen for non-admins
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-6">
+            <ShieldAlert className="w-10 h-10 text-destructive" />
+          </div>
+          <h1 className="font-display text-2xl font-bold mb-2 text-foreground">Access Denied</h1>
+          <p className="text-muted-foreground mb-6">
+            You don't have admin privileges to access this page. Please contact an administrator if you believe this is an error.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button variant="outline" onClick={() => navigate("/dashboard")}>
+              Go to Student Dashboard
+            </Button>
+            <Button onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -187,13 +242,13 @@ const AdminDashboard = () => {
               <p className="text-sm text-muted-foreground">Create a new fitness class</p>
             </button>
             
-            <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
+            <Link to="/admin/users" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
                 <Users className="w-6 h-6 text-accent" />
               </div>
               <h3 className="font-semibold mb-1 text-foreground">Manage Users</h3>
               <p className="text-sm text-muted-foreground">View and manage members</p>
-            </button>
+            </Link>
             
             <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-energy/10 flex items-center justify-center mb-4 group-hover:bg-energy/20 transition-colors">
