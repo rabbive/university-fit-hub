@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import UserManagement from "./pages/UserManagement";
 import WorkoutLogger from "./pages/WorkoutLogger";
 import ClassBooking from "./pages/ClassBooking";
 import AIWorkoutPlanner from "./pages/AIWorkoutPlanner";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/workout/log" element={<WorkoutLogger />} />
           <Route path="/classes" element={<ClassBooking />} />
           <Route path="/ai-planner" element={<AIWorkoutPlanner />} />
