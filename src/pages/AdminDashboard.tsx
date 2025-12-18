@@ -13,7 +13,9 @@ import {
   ShieldAlert,
   ClipboardList,
   Trophy,
-  Award
+  Award,
+  RefreshCw,
+  FileText
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
@@ -24,6 +26,7 @@ const AdminDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [resettingDemo, setResettingDemo] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalClasses: 0,
@@ -108,6 +111,32 @@ const AdminDashboard = () => {
       description: "You've been successfully signed out.",
     });
     navigate("/");
+  };
+
+  const handleResetDemoData = async () => {
+    setResettingDemo(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('reset-demo-data');
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Demo Data Reset",
+        description: "All demo data has been refreshed successfully!",
+      });
+      
+      // Refresh stats
+      fetchStats();
+    } catch (error: any) {
+      console.error("Error resetting demo data:", error);
+      toast({
+        title: "Reset Failed",
+        description: error.message || "Failed to reset demo data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setResettingDemo(false);
+    }
   };
 
   if (loading) {
@@ -301,7 +330,38 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Info Banner */}
+        {/* Demo Tools */}
+        <div className="mb-8">
+          <h2 className="font-display text-xl font-semibold mb-4 text-foreground">Demo Tools</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button 
+              onClick={handleResetDemoData}
+              disabled={resettingDemo}
+              className="glass-hover rounded-2xl p-6 text-left group border border-destructive/20 hover:border-destructive/40 transition-colors disabled:opacity-50"
+            >
+              <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center mb-4 group-hover:bg-destructive/20 transition-colors">
+                <RefreshCw className={`w-6 h-6 text-destructive ${resettingDemo ? 'animate-spin' : ''}`} />
+              </div>
+              <h3 className="font-semibold mb-1 text-foreground">
+                {resettingDemo ? 'Resetting...' : 'Reset Demo Data'}
+              </h3>
+              <p className="text-sm text-muted-foreground">Refresh all demo data for presentations</p>
+            </button>
+            
+            <a 
+              href="/DEMO_GUIDE.md" 
+              target="_blank"
+              className="glass-hover rounded-2xl p-6 text-left group border border-primary/20 hover:border-primary/40 transition-colors"
+            >
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                <FileText className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-1 text-foreground">Demo Guide</h3>
+              <p className="text-sm text-muted-foreground">View walkthrough documentation</p>
+            </a>
+          </div>
+        </div>
+
         <div className="glass rounded-2xl p-8 text-center border border-primary/20">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-4">
             <Dumbbell className="w-8 h-8 text-primary-foreground" />
