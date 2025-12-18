@@ -15,6 +15,8 @@ import {
   CheckCircle2,
   Dumbbell
 } from "lucide-react";
+import { CardSkeleton, ListSkeleton } from "@/components/animations/SkeletonLoader";
+import { BottomNav } from "@/components/BottomNav";
 import type { User } from "@supabase/supabase-js";
 
 interface FitnessClass {
@@ -197,14 +199,20 @@ const ClassBooking = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background p-6">
+        <div className="container mx-auto grid lg:grid-cols-[340px,1fr] gap-8">
+          <CardSkeleton className="h-[400px]" />
+          <div className="space-y-4">
+            <div className="h-8 w-48 bg-muted/50 rounded animate-pulse" />
+            <ListSkeleton items={3} />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -386,6 +394,8 @@ const ClassBooking = () => {
           </div>
         </div>
       </main>
+      
+      <BottomNav />
     </div>
   );
 };

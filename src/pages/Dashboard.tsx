@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,8 @@ import {
   Swords,
   User,
   ChevronRight,
-  Heart
+  Heart,
+  Plus
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
@@ -27,6 +28,12 @@ import { AnimatedCounter } from "@/components/animations/AnimatedCounter";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerContainer";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { ActivityHeatmap } from "@/components/animations/ActivityHeatmap";
+import { CardSkeleton, ListSkeleton } from "@/components/animations/SkeletonLoader";
+import { BottomNav } from "@/components/BottomNav";
+import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
+import { OnboardingWizard } from "@/components/Onboarding";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { AnimatePresence } from "framer-motion";
 
 interface RecentWorkout {
   id: string;
@@ -58,6 +65,13 @@ const Dashboard = () => {
   const [recentWorkouts, setRecentWorkouts] = useState<RecentWorkout[]>([]);
   const [upcomingClasses, setUpcomingClasses] = useState<UpcomingClass[]>([]);
   const [activityData, setActivityData] = useState<{ date: string; count: number }[]>([]);
+  const { showOnboarding, completeOnboarding, skipOnboarding, isLoading: onboardingLoading } = useOnboarding();
+
+  const fabActions = [
+    { icon: Dumbbell, label: "Log Workout", onClick: () => navigate("/workout/log"), color: "primary" as const },
+    { icon: Calendar, label: "Book Class", onClick: () => navigate("/classes"), color: "accent" as const },
+    { icon: Sparkles, label: "AI Planner", onClick: () => navigate("/ai-planner"), color: "warning" as const },
+  ];
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -202,16 +216,34 @@ const Dashboard = () => {
     return format(date, "EEE, MMM d 'at' h:mm a");
   };
 
-  if (loading) {
+  if (loading || onboardingLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background p-6">
+        <div className="container mx-auto space-y-6">
+          <CardSkeleton />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+          <ListSkeleton items={4} />
+        </div>
       </div>
     );
   }
 
   return (
-    <PageTransition className="min-h-screen bg-background">
+    <>
+      <AnimatePresence>
+        {showOnboarding && (
+          <OnboardingWizard 
+            onComplete={completeOnboarding} 
+            onSkip={skipOnboarding} 
+          />
+        )}
+      </AnimatePresence>
+
+      <PageTransition className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -527,7 +559,14 @@ const Dashboard = () => {
           </div>
         </FadeIn>
       </main>
+
+      {/* Floating Action Button - Mobile */}
+      <FloatingActionButton actions={fabActions} className="md:hidden" />
+      
+      {/* Bottom Navigation - Mobile */}
+      <BottomNav />
     </PageTransition>
+    </>
   );
 };
 
