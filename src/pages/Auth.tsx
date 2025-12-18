@@ -276,6 +276,36 @@ const Auth = () => {
               )}
             </button>
           </div>
+
+          {/* Demo Credentials Box */}
+          <div className="mt-8 p-4 rounded-xl bg-secondary/50 border border-border/50">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">🎮</span>
+              <span className="font-medium text-foreground">Demo Credentials</span>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-primary">Admin Login</span>
+                </div>
+                <div className="text-muted-foreground space-y-0.5">
+                  <div>Email: <span className="text-foreground font-mono">admin@test.com</span></div>
+                  <div>Password: <span className="text-foreground font-mono">password123</span></div>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-accent/10 border border-accent/20">
+                <div className="flex items-center gap-2 mb-1">
+                  <GraduationCap className="w-4 h-4 text-accent" />
+                  <span className="font-medium text-accent">Student Login</span>
+                </div>
+                <div className="text-muted-foreground space-y-0.5">
+                  <div>Email: <span className="text-foreground font-mono">student@test.com</span></div>
+                  <div>Password: <span className="text-foreground font-mono">password123</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
