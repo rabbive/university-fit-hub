@@ -176,13 +176,13 @@ const Dashboard = () => {
               <p className="text-sm text-muted-foreground">Track your exercises and sets</p>
             </Link>
             
-            <button className="glass-hover rounded-2xl p-6 text-left group">
+            <Link to="/classes" className="glass-hover rounded-2xl p-6 text-left group">
               <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
                 <Calendar className="w-6 h-6 text-accent" />
               </div>
               <h3 className="font-semibold mb-1">Book Class</h3>
               <p className="text-sm text-muted-foreground">Reserve your spot in classes</p>
-            </button>
+            </Link>
             
             <button className="glass-hover rounded-2xl p-6 text-left group">
               <div className="w-12 h-12 rounded-xl bg-energy/10 flex items-center justify-center mb-4 group-hover:bg-energy/20 transition-colors">
