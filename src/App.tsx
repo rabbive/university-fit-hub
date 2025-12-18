@@ -17,6 +17,8 @@ import Leaderboard from "./pages/Leaderboard";
 import Achievements from "./pages/Achievements";
 import Challenges from "./pages/Challenges";
 import Profile from "./pages/Profile";
+import GymOccupancy from "./pages/GymOccupancy";
+import WorkoutHistory from "./pages/WorkoutHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,12 +38,14 @@ const App = () => (
           <Route path="/admin/classes" element={<ClassManagement />} />
           <Route path="/admin/analytics" element={<Analytics />} />
           <Route path="/workout/log" element={<WorkoutLogger />} />
+          <Route path="/workout/history" element={<WorkoutHistory />} />
           <Route path="/classes" element={<ClassBooking />} />
           <Route path="/ai-planner" element={<AIWorkoutPlanner />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/gym-occupancy" element={<GymOccupancy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
