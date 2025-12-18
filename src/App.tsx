@@ -8,6 +8,8 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserManagement from "./pages/UserManagement";
+import ClassManagement from "./pages/ClassManagement";
+import Analytics from "./pages/Analytics";
 import WorkoutLogger from "./pages/WorkoutLogger";
 import ClassBooking from "./pages/ClassBooking";
 import AIWorkoutPlanner from "./pages/AIWorkoutPlanner";
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/classes" element={<ClassManagement />} />
+          <Route path="/admin/analytics" element={<Analytics />} />
           <Route path="/workout/log" element={<WorkoutLogger />} />
           <Route path="/classes" element={<ClassBooking />} />
           <Route path="/ai-planner" element={<AIWorkoutPlanner />} />
