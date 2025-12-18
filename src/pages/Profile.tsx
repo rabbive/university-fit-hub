@@ -21,9 +21,13 @@ import {
   Trophy,
   Target,
   Calendar,
-  Bell
+  Bell,
+  Check
 } from "lucide-react";
 import { PushNotificationSettings } from "@/components/PushNotificationSettings";
+import { CardSkeleton } from "@/components/animations/SkeletonLoader";
+import { BottomNav } from "@/components/BottomNav";
+import { motion } from "framer-motion";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface ProfileData {
@@ -171,14 +175,22 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background p-6">
+        <div className="container mx-auto max-w-2xl space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <CardSkeleton key={i} />
+            ))}
+          </div>
+          <CardSkeleton className="h-64" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -338,6 +350,8 @@ const Profile = () => {
           </div>
         </div>
       </main>
+      
+      <BottomNav />
     </div>
   );
 };

@@ -12,6 +12,9 @@ import {
   User
 } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { ListSkeleton } from "@/components/animations/SkeletonLoader";
+import { BottomNav } from "@/components/BottomNav";
+import { motion } from "framer-motion";
 
 interface LeaderboardEntry {
   id: string;
@@ -111,14 +114,25 @@ const Leaderboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background p-6">
+        <div className="container mx-auto max-w-3xl space-y-6">
+          <div className="h-10 w-40 bg-muted/50 rounded-lg animate-pulse" />
+          <div className="flex justify-center gap-4 mb-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-muted/50 animate-pulse" />
+                <div className="h-4 w-16 bg-muted/50 rounded mt-2 animate-pulse" />
+              </div>
+            ))}
+          </div>
+          <ListSkeleton items={5} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -269,6 +283,8 @@ const Leaderboard = () => {
           )}
         </div>
       </main>
+      
+      <BottomNav />
     </div>
   );
 };
