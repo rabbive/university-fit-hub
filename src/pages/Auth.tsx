@@ -281,29 +281,51 @@ const Auth = () => {
           <div className="mt-8 p-4 rounded-xl bg-secondary/50 border border-border/50">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-lg">🎮</span>
-              <span className="font-medium text-foreground">Demo Credentials</span>
+              <span className="font-medium text-foreground">Quick Demo Login</span>
             </div>
             <div className="space-y-3 text-sm">
-              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-2 mb-1">
-                  <Shield className="w-4 h-4 text-primary" />
-                  <span className="font-medium text-primary">Admin Login</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("admin@test.com");
+                  setPassword("password123");
+                  setIsSignUp(false);
+                  toast({ title: "Admin credentials filled", description: "Click 'Log In' to continue" });
+                }}
+                className="w-full p-3 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors text-left group"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-primary" />
+                    <span className="font-medium text-primary">Admin Login</span>
+                  </div>
+                  <span className="text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">Click to fill →</span>
                 </div>
-                <div className="text-muted-foreground space-y-0.5">
-                  <div>Email: <span className="text-foreground font-mono">admin@test.com</span></div>
-                  <div>Password: <span className="text-foreground font-mono">password123</span></div>
+                <div className="text-muted-foreground text-xs">
+                  admin@test.com • password123
                 </div>
-              </div>
-              <div className="p-3 rounded-lg bg-accent/10 border border-accent/20">
-                <div className="flex items-center gap-2 mb-1">
-                  <GraduationCap className="w-4 h-4 text-accent" />
-                  <span className="font-medium text-accent">Student Login</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("student@test.com");
+                  setPassword("password123");
+                  setIsSignUp(false);
+                  toast({ title: "Student credentials filled", description: "Click 'Log In' to continue" });
+                }}
+                className="w-full p-3 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors text-left group"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-accent" />
+                    <span className="font-medium text-accent">Student Login</span>
+                  </div>
+                  <span className="text-xs text-accent opacity-0 group-hover:opacity-100 transition-opacity">Click to fill →</span>
                 </div>
-                <div className="text-muted-foreground space-y-0.5">
-                  <div>Email: <span className="text-foreground font-mono">student@test.com</span></div>
-                  <div>Password: <span className="text-foreground font-mono">password123</span></div>
+                <div className="text-muted-foreground text-xs">
+                  student@test.com • password123
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
