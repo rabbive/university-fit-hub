@@ -10,17 +10,46 @@ import {
   Calendar,
   Sparkles,
   TrendingUp,
-  Flame
+  Flame,
+  Medal,
+  Users,
+  Swords,
+  User,
+  ChevronRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { User } from "@supabase/supabase-js";
+import { format, parseISO, isToday, isTomorrow } from "date-fns";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+
+interface RecentWorkout {
+  id: string;
+  name: string;
+  points_earned: number;
+  completed_at: string;
+  exercise_count: number;
+}
+
+interface UpcomingClass {
+  id: string;
+  name: string;
+  scheduled_at: string;
+  instructor: string | null;
+  location: string | null;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalWorkouts: 0,
+    prsThisMonth: 0,
+    classesBooked: 0,
+  });
+  const [recentWorkouts, setRecentWorkouts] = useState<RecentWorkout[]>([]);
+  const [upcomingClasses, setUpcomingClasses] = useState<UpcomingClass[]>([]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -36,25 +65,93 @@ const Dashboard = () => {
         navigate("/auth");
       } else {
         setUser(session.user);
-        fetchProfile(session.user.id);
+        fetchDashboardData(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchDashboardData = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch profile
+      const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .maybeSingle();
 
-      if (error) throw error;
-      setProfile(data);
+      setProfile(profileData);
+
+      // Fetch workouts count
+      const { count: workoutCount } = await supabase
+        .from("workouts")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      // Fetch recent workouts with exercise count
+      const { data: workoutsData } = await supabase
+        .from("workouts")
+        .select("id, name, points_earned, completed_at")
+        .eq("user_id", userId)
+        .order("completed_at", { ascending: false })
+        .limit(3);
+
+      if (workoutsData) {
+        const workoutsWithCounts = await Promise.all(
+          workoutsData.map(async (workout) => {
+            const { count } = await supabase
+              .from("workout_exercises")
+              .select("*", { count: "exact", head: true })
+              .eq("workout_id", workout.id);
+            return { ...workout, exercise_count: count || 0 };
+          })
+        );
+        setRecentWorkouts(workoutsWithCounts);
+      }
+
+      // Fetch PRs this month
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const workoutIds = workoutsData?.map(w => w.id) || [];
+      let prCount = 0;
+      if (workoutIds.length > 0) {
+        const { count } = await supabase
+          .from("workout_exercises")
+          .select("*", { count: "exact", head: true })
+          .in("workout_id", workoutIds)
+          .eq("is_pr", true);
+        prCount = count || 0;
+      }
+
+      // Fetch booked classes
+      const { data: bookingsData } = await supabase
+        .from("class_bookings")
+        .select("class_id, fitness_classes(id, name, scheduled_at, instructor, location)")
+        .eq("user_id", userId);
+
+      const bookedClassIds = bookingsData?.map(b => b.class_id) || [];
+
+      // Fetch upcoming booked classes
+      const { data: upcomingData } = await supabase
+        .from("fitness_classes")
+        .select("id, name, scheduled_at, instructor, location")
+        .in("id", bookedClassIds.length > 0 ? bookedClassIds : ['00000000-0000-0000-0000-000000000000'])
+        .gte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at", { ascending: true })
+        .limit(3);
+
+      setUpcomingClasses(upcomingData || []);
+
+      setStats({
+        totalWorkouts: workoutCount || 0,
+        prsThisMonth: prCount,
+        classesBooked: bookedClassIds.length,
+      });
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -67,6 +164,13 @@ const Dashboard = () => {
       description: "You've been successfully signed out.",
     });
     navigate("/");
+  };
+
+  const formatClassDate = (dateString: string) => {
+    const date = parseISO(dateString);
+    if (isToday(date)) return `Today, ${format(date, "h:mm a")}`;
+    if (isTomorrow(date)) return `Tomorrow, ${format(date, "h:mm a")}`;
+    return format(date, "EEE, MMM d 'at' h:mm a");
   };
 
   if (loading) {
@@ -93,9 +197,12 @@ const Dashboard = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            <Link to="/profile" className="hidden sm:flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+              <User className="w-4 h-4" />
+              <span className="text-sm">{profile?.full_name || user?.email}</span>
+            </Link>
             <div className="text-right hidden sm:block">
-              <div className="font-medium text-foreground">{profile?.full_name || user?.email}</div>
-              <div className="text-sm text-muted-foreground">{profile?.total_points || 0} points</div>
+              <div className="text-sm font-medium text-primary">{profile?.total_points || 0} pts</div>
             </div>
             <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="w-5 h-5" />
@@ -148,7 +255,7 @@ const Dashboard = () => {
                 <Target className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <div className="text-2xl font-display font-bold text-foreground">0</div>
+                <div className="text-2xl font-display font-bold text-foreground">{stats.totalWorkouts}</div>
                 <div className="text-sm text-muted-foreground">Workouts</div>
               </div>
             </div>
@@ -160,7 +267,7 @@ const Dashboard = () => {
                 <TrendingUp className="w-6 h-6 text-warning" />
               </div>
               <div>
-                <div className="text-2xl font-display font-bold text-foreground">0</div>
+                <div className="text-2xl font-display font-bold text-foreground">{stats.prsThisMonth}</div>
                 <div className="text-sm text-muted-foreground">PRs This Month</div>
               </div>
             </div>
@@ -187,13 +294,13 @@ const Dashboard = () => {
               <p className="text-sm text-muted-foreground">Reserve your spot in classes</p>
             </Link>
             
-            <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
+            <Link to="/leaderboard" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-energy/10 flex items-center justify-center mb-4 group-hover:bg-energy/20 transition-colors">
-                <Trophy className="w-6 h-6 text-energy" />
+                <Users className="w-6 h-6 text-energy" />
               </div>
               <h3 className="font-semibold mb-1 text-foreground">Leaderboard</h3>
               <p className="text-sm text-muted-foreground">See how you rank</p>
-            </button>
+            </Link>
             
             <Link to="/ai-planner" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center mb-4 group-hover:bg-warning/20 transition-colors">
@@ -205,15 +312,127 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Coming Soon Banner */}
-        <div className="glass rounded-2xl p-8 text-center border border-accent/20">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-accent/80 flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-8 h-8 text-accent-foreground" />
+        {/* Secondary Actions */}
+        <div className="grid sm:grid-cols-3 gap-4 mb-8">
+          <Link to="/achievements" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Medal className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Achievements</h3>
+              <p className="text-xs text-muted-foreground">View your badges</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          
+          <Link to="/challenges" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
+            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+              <Swords className="w-5 h-5 text-accent" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Challenges</h3>
+              <p className="text-xs text-muted-foreground">Join active challenges</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          
+          <Link to="/profile" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
+            <div className="w-10 h-10 rounded-lg bg-energy/10 flex items-center justify-center">
+              <User className="w-5 h-5 text-energy" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Profile</h3>
+              <p className="text-xs text-muted-foreground">Edit your settings</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Recent Workouts */}
+          <div className="glass rounded-2xl p-6 border border-border/50">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-lg font-semibold text-foreground">Recent Workouts</h3>
+              <Link to="/workout/log" className="text-sm text-primary hover:text-primary/80 transition-colors">
+                Log new
+              </Link>
+            </div>
+            
+            {recentWorkouts.length === 0 ? (
+              <div className="text-center py-8">
+                <Dumbbell className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                <p className="text-muted-foreground">No workouts yet</p>
+                <Link to="/workout/log">
+                  <Button variant="outline" size="sm" className="mt-3">
+                    Log your first workout
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentWorkouts.map((workout) => (
+                  <div key={workout.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Dumbbell className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-foreground">{workout.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {workout.exercise_count} exercises • {format(parseISO(workout.completed_at), "MMM d")}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-sm font-medium text-primary">+{workout.points_earned} pts</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <h3 className="font-display text-xl font-semibold mb-2 text-foreground">More Features Coming Soon</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            We're building workout logging, class booking, leaderboards, and AI-powered workout planning. Stay tuned!
-          </p>
+
+          {/* Upcoming Classes */}
+          <div className="glass rounded-2xl p-6 border border-border/50">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-lg font-semibold text-foreground">Upcoming Classes</h3>
+              <Link to="/classes" className="text-sm text-accent hover:text-accent/80 transition-colors">
+                View all
+              </Link>
+            </div>
+            
+            {upcomingClasses.length === 0 ? (
+              <div className="text-center py-8">
+                <Calendar className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                <p className="text-muted-foreground">No upcoming classes</p>
+                <Link to="/classes">
+                  <Button variant="outline" size="sm" className="mt-3">
+                    Book a class
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {upcomingClasses.map((cls) => (
+                  <div key={cls.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-accent" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-foreground">{cls.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {formatClassDate(cls.scheduled_at)}
+                        </div>
+                      </div>
+                    </div>
+                    {cls.location && (
+                      <div className="text-xs text-muted-foreground">{cls.location}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </div>
