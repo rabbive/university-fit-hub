@@ -147,7 +147,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background dark flex">
+    <div className="min-h-screen bg-background flex">
       {/* Left side - Form */}
       <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
