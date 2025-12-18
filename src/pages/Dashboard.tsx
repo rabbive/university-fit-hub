@@ -21,6 +21,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { PageTransition } from "@/components/animations/PageTransition";
+import { AnimatedCard } from "@/components/animations/AnimatedCard";
+import { AnimatedCounter } from "@/components/animations/AnimatedCounter";
+import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerContainer";
+import { FadeIn } from "@/components/animations/FadeIn";
 
 interface RecentWorkout {
   id: string;
@@ -183,7 +188,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageTransition className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -215,65 +220,85 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
+        <FadeIn className="mb-8">
           <h1 className="font-display text-3xl font-bold mb-2 text-foreground">
             Welcome back, {profile?.full_name?.split(' ')[0] || 'Champion'}! 👋
           </h1>
           <p className="text-muted-foreground">
             Ready to crush your fitness goals today?
           </p>
-        </div>
+        </FadeIn>
 
         {/* Stats Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="glass-hover rounded-2xl p-6 border border-border/50">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-primary" />
+        <StaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <StaggerItem>
+            <AnimatedCard className="glass-hover rounded-2xl p-6 border border-border/50 h-full">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Trophy className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <AnimatedCounter 
+                    value={profile?.total_points || 0} 
+                    className="text-2xl font-display font-bold text-foreground"
+                  />
+                  <div className="text-sm text-muted-foreground">Total Points</div>
+                </div>
               </div>
-              <div>
-                <div className="text-2xl font-display font-bold text-foreground">{profile?.total_points || 0}</div>
-                <div className="text-sm text-muted-foreground">Total Points</div>
-              </div>
-            </div>
-          </div>
+            </AnimatedCard>
+          </StaggerItem>
           
-          <div className="glass-hover rounded-2xl p-6 border border-border/50">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-energy/10 flex items-center justify-center">
-                <Flame className="w-6 h-6 text-energy" />
+          <StaggerItem>
+            <AnimatedCard className="glass-hover rounded-2xl p-6 border border-border/50 h-full">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-energy/10 flex items-center justify-center">
+                  <Flame className="w-6 h-6 text-energy" />
+                </div>
+                <div>
+                  <AnimatedCounter 
+                    value={profile?.current_streak || 0} 
+                    className="text-2xl font-display font-bold text-foreground"
+                  />
+                  <div className="text-sm text-muted-foreground">Day Streak</div>
+                </div>
               </div>
-              <div>
-                <div className="text-2xl font-display font-bold text-foreground">{profile?.current_streak || 0}</div>
-                <div className="text-sm text-muted-foreground">Day Streak</div>
-              </div>
-            </div>
-          </div>
+            </AnimatedCard>
+          </StaggerItem>
           
-          <div className="glass-hover rounded-2xl p-6 border border-border/50">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                <Target className="w-6 h-6 text-accent" />
+          <StaggerItem>
+            <AnimatedCard className="glass-hover rounded-2xl p-6 border border-border/50 h-full">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                  <Target className="w-6 h-6 text-accent" />
+                </div>
+                <div>
+                  <AnimatedCounter 
+                    value={stats.totalWorkouts} 
+                    className="text-2xl font-display font-bold text-foreground"
+                  />
+                  <div className="text-sm text-muted-foreground">Workouts</div>
+                </div>
               </div>
-              <div>
-                <div className="text-2xl font-display font-bold text-foreground">{stats.totalWorkouts}</div>
-                <div className="text-sm text-muted-foreground">Workouts</div>
-              </div>
-            </div>
-          </div>
+            </AnimatedCard>
+          </StaggerItem>
           
-          <div className="glass-hover rounded-2xl p-6 border border-border/50">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-warning" />
+          <StaggerItem>
+            <AnimatedCard className="glass-hover rounded-2xl p-6 border border-border/50 h-full">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-warning" />
+                </div>
+                <div>
+                  <AnimatedCounter 
+                    value={stats.prsThisMonth} 
+                    className="text-2xl font-display font-bold text-foreground"
+                  />
+                  <div className="text-sm text-muted-foreground">PRs This Month</div>
+                </div>
               </div>
-              <div>
-                <div className="text-2xl font-display font-bold text-foreground">{stats.prsThisMonth}</div>
-                <div className="text-sm text-muted-foreground">PRs This Month</div>
-              </div>
-            </div>
-          </div>
-        </div>
+            </AnimatedCard>
+          </StaggerItem>
+        </StaggerContainer>
 
         {/* Quick Actions */}
         <div className="mb-8">
@@ -469,7 +494,7 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
-    </div>
+    </PageTransition>
   );
 };
 
