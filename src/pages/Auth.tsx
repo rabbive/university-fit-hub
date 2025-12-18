@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Dumbbell, ArrowLeft, Loader2, Mail, Lock, User } from "lucide-react";
+import { Dumbbell, ArrowLeft, Loader2, Mail, Lock, User, Shield, GraduationCap } from "lucide-react";
 import { z } from "zod";
 
 const emailSchema = z.string().email("Please enter a valid email address");
@@ -16,6 +16,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  const role = searchParams.get("role") || "student";
   const [isSignUp, setIsSignUp] = useState(searchParams.get("mode") === "signup");
   const [isLoading, setIsLoading] = useState(false);
   
@@ -25,22 +26,26 @@ const Auth = () => {
   
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
 
+  const getDashboardRoute = () => {
+    return role === "admin" ? "/admin" : "/dashboard";
+  };
+
   // Check if user is already logged in
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate("/dashboard");
+        navigate(getDashboardRoute());
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        navigate(getDashboardRoute());
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, role]);
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string; fullName?: string } = {};
@@ -104,7 +109,7 @@ const Auth = () => {
             title: "Welcome to FitClub!",
             description: "Your account has been created successfully.",
           });
-          navigate("/dashboard");
+          navigate(getDashboardRoute());
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -127,7 +132,7 @@ const Auth = () => {
             title: "Welcome back!",
             description: "You've been logged in successfully.",
           });
-          navigate("/dashboard");
+          navigate(getDashboardRoute());
         }
       }
     } catch (error: any) {
@@ -152,19 +157,36 @@ const Auth = () => {
           </Link>
           
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Dumbbell className="w-6 h-6 text-primary-foreground" />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+              role === "admin" 
+                ? "bg-gradient-to-br from-primary to-primary/80" 
+                : "bg-gradient-to-br from-accent to-accent/80"
+            }`}>
+              {role === "admin" ? (
+                <Shield className="w-6 h-6 text-primary-foreground" />
+              ) : (
+                <GraduationCap className="w-6 h-6 text-accent-foreground" />
+              )}
             </div>
-            <span className="font-display text-2xl font-bold">FitClub</span>
+            <div>
+              <span className="font-display text-2xl font-bold text-foreground">FitClub</span>
+              <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium ${
+                role === "admin" 
+                  ? "bg-primary/10 text-primary" 
+                  : "bg-accent/10 text-accent"
+              }`}>
+                {role === "admin" ? "Admin" : "Student"}
+              </span>
+            </div>
           </div>
           
-          <h1 className="font-display text-3xl font-bold mb-2">
+          <h1 className="font-display text-3xl font-bold mb-2 text-foreground">
             {isSignUp ? "Create your account" : "Welcome back"}
           </h1>
           <p className="text-muted-foreground mb-8">
             {isSignUp 
-              ? "Start your fitness journey today" 
-              : "Log in to continue your progress"
+              ? `Sign up as ${role === "admin" ? "an administrator" : "a student"}` 
+              : `Log in to your ${role} account`
             }
           </p>
           
