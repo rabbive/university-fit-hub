@@ -3,8 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, TrendingUp, Users, Dumbbell, Calendar } from "lucide-react";
+import { ArrowLeft, Loader2, TrendingUp, Users, Dumbbell, Calendar, Download, FileText, FileSpreadsheet } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -39,12 +45,17 @@ interface EngagementStats {
   avgPointsPerUser: number;
 }
 
-const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+interface ExportData {
+  workouts: any[];
+  bookings: any[];
+  users: any[];
+}
 
 const Analytics = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [workoutTrends, setWorkoutTrends] = useState<WorkoutTrend[]>([]);
   const [classPopularity, setClassPopularity] = useState<ClassPopularity[]>([]);
   const [engagementStats, setEngagementStats] = useState<EngagementStats>({
@@ -84,7 +95,6 @@ const Analytics = () => {
     setLoading(true);
     
     try {
-      // Fetch workout trends for last 7 days
       const last7Days = Array.from({ length: 7 }, (_, i) => {
         const date = subDays(new Date(), 6 - i);
         return format(startOfDay(date), "yyyy-MM-dd");
@@ -103,7 +113,6 @@ const Analytics = () => {
       });
       setWorkoutTrends(workoutCounts);
 
-      // Fetch class popularity
       const { data: bookingsData } = await supabase
         .from("class_bookings")
         .select("class_id, fitness_classes(name)");
@@ -120,7 +129,6 @@ const Analytics = () => {
         .slice(0, 5);
       setClassPopularity(popularClasses);
 
-      // Fetch engagement stats
       const { count: totalUsers } = await supabase
         .from("profiles")
         .select("*", { count: "exact", head: true });
@@ -140,7 +148,6 @@ const Analytics = () => {
       const totalPoints = profilesWithPoints?.reduce((sum, p) => sum + (p.total_points || 0), 0) || 0;
       const avgPoints = totalUsers ? Math.round(totalPoints / totalUsers) : 0;
 
-      // Count active users (users with at least one workout in last 30 days)
       const { data: activeWorkouts } = await supabase
         .from("workouts")
         .select("user_id")
@@ -164,6 +171,213 @@ const Analytics = () => {
     setLoading(false);
   };
 
+  const fetchExportData = async (): Promise<ExportData> => {
+    const [workoutsRes, bookingsRes, usersRes] = await Promise.all([
+      supabase.from("workouts").select("*, workout_exercises(*)"),
+      supabase.from("class_bookings").select("*, fitness_classes(name, instructor)"),
+      supabase.from("profiles").select("*"),
+    ]);
+
+    return {
+      workouts: workoutsRes.data || [],
+      bookings: bookingsRes.data || [],
+      users: usersRes.data || [],
+    };
+  };
+
+  const exportToCSV = async (type: "workouts" | "bookings" | "users" | "all") => {
+    setExporting(true);
+    try {
+      const data = await fetchExportData();
+      let csvContent = "";
+      let filename = "";
+
+      if (type === "workouts" || type === "all") {
+        const workoutRows = data.workouts.map((w) => ({
+          id: w.id,
+          name: w.name,
+          completed_at: w.completed_at,
+          duration_minutes: w.duration_minutes,
+          points_earned: w.points_earned,
+          exercises_count: w.workout_exercises?.length || 0,
+        }));
+        
+        if (type === "workouts") {
+          csvContent = convertToCSV(workoutRows);
+          filename = `workouts_${format(new Date(), "yyyy-MM-dd")}.csv`;
+        }
+      }
+
+      if (type === "bookings" || type === "all") {
+        const bookingRows = data.bookings.map((b) => ({
+          id: b.id,
+          class_name: (b.fitness_classes as any)?.name || "Unknown",
+          instructor: (b.fitness_classes as any)?.instructor || "Unknown",
+          booked_at: b.booked_at,
+          attended: b.attended ? "Yes" : "No",
+        }));
+        
+        if (type === "bookings") {
+          csvContent = convertToCSV(bookingRows);
+          filename = `bookings_${format(new Date(), "yyyy-MM-dd")}.csv`;
+        }
+      }
+
+      if (type === "users" || type === "all") {
+        const userRows = data.users.map((u) => ({
+          id: u.id,
+          full_name: u.full_name || "N/A",
+          fitness_level: u.fitness_level,
+          total_points: u.total_points,
+          current_streak: u.current_streak,
+          created_at: u.created_at,
+        }));
+        
+        if (type === "users") {
+          csvContent = convertToCSV(userRows);
+          filename = `users_${format(new Date(), "yyyy-MM-dd")}.csv`;
+        }
+      }
+
+      if (type === "all") {
+        const allData = {
+          summary: {
+            total_users: engagementStats.totalUsers,
+            active_users: engagementStats.activeUsers,
+            total_workouts: engagementStats.totalWorkouts,
+            total_bookings: engagementStats.totalBookings,
+            avg_points_per_user: engagementStats.avgPointsPerUser,
+            export_date: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+          },
+        };
+        csvContent = convertToCSV([allData.summary]);
+        filename = `analytics_summary_${format(new Date(), "yyyy-MM-dd")}.csv`;
+      }
+
+      downloadFile(csvContent, filename, "text/csv");
+      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} exported successfully`);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export data");
+    }
+    setExporting(false);
+  };
+
+  const exportToPDF = async () => {
+    setExporting(true);
+    try {
+      const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Analytics Report - ${format(new Date(), "yyyy-MM-dd")}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    h1 { color: #1a1a1a; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+    h2 { color: #374151; margin-top: 30px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 20px 0; }
+    .stat-card { background: #f3f4f6; padding: 20px; border-radius: 8px; }
+    .stat-value { font-size: 32px; font-weight: bold; color: #3b82f6; }
+    .stat-label { color: #6b7280; margin-top: 5px; }
+    .chart-section { margin: 30px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
+    th { background: #f9fafb; font-weight: 600; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>FitClub Analytics Report</h1>
+  <p>Generated on: ${format(new Date(), "MMMM d, yyyy 'at' h:mm a")}</p>
+  
+  <h2>Overview Statistics</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">${engagementStats.totalUsers}</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${engagementStats.activeUsers}</div>
+      <div class="stat-label">Active Users (30 days)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${engagementStats.totalWorkouts}</div>
+      <div class="stat-label">Total Workouts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${engagementStats.totalBookings}</div>
+      <div class="stat-label">Class Bookings</div>
+    </div>
+  </div>
+
+  <h2>Workout Trends (Last 7 Days)</h2>
+  <table>
+    <tr><th>Date</th><th>Workouts</th></tr>
+    ${workoutTrends.map((w) => `<tr><td>${w.date}</td><td>${w.count}</td></tr>`).join("")}
+  </table>
+
+  <h2>Popular Classes</h2>
+  <table>
+    <tr><th>Class Name</th><th>Bookings</th></tr>
+    ${classPopularity.length > 0 
+      ? classPopularity.map((c) => `<tr><td>${c.name}</td><td>${c.bookings}</td></tr>`).join("")
+      : "<tr><td colspan='2'>No booking data available</td></tr>"
+    }
+  </table>
+
+  <h2>User Engagement</h2>
+  <p>Average points per user: <strong>${engagementStats.avgPointsPerUser}</strong></p>
+  <p>User activity rate: <strong>${engagementStats.totalUsers > 0 ? Math.round((engagementStats.activeUsers / engagementStats.totalUsers) * 100) : 0}%</strong></p>
+
+  <div class="footer">
+    <p>This report was automatically generated by FitClub Admin Dashboard.</p>
+  </div>
+</body>
+</html>`;
+
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const printWindow = window.open(url, "_blank");
+      
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+      
+      toast.success("PDF report opened - use browser print to save as PDF");
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast.error("Failed to generate PDF");
+    }
+    setExporting(false);
+  };
+
+  const convertToCSV = (data: any[]) => {
+    if (data.length === 0) return "";
+    const headers = Object.keys(data[0]);
+    const rows = data.map((row) =>
+      headers.map((header) => {
+        const value = row[header];
+        const escaped = String(value ?? "").replace(/"/g, '""');
+        return `"${escaped}"`;
+      }).join(",")
+    );
+    return [headers.join(","), ...rows].join("\n");
+  };
+
+  const downloadFile = (content: string, filename: string, type: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -175,11 +389,47 @@ const Analytics = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold text-foreground">Analytics Dashboard</h1>
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold text-foreground">Analytics Dashboard</h1>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button disabled={exporting}>
+                {exporting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportToCSV("all")}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export Summary (CSV)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToCSV("workouts")}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export Workouts (CSV)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToCSV("bookings")}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export Bookings (CSV)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportToCSV("users")}>
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Export Users (CSV)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToPDF}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export Report (PDF)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -249,7 +499,6 @@ const Analytics = () => {
 
             {/* Charts */}
             <div className="grid gap-8 lg:grid-cols-2">
-              {/* Workout Trends */}
               <Card>
                 <CardHeader>
                   <CardTitle>Workout Trends (Last 7 Days)</CardTitle>
@@ -285,7 +534,6 @@ const Analytics = () => {
                 </CardContent>
               </Card>
 
-              {/* Popular Classes */}
               <Card>
                 <CardHeader>
                   <CardTitle>Popular Classes</CardTitle>

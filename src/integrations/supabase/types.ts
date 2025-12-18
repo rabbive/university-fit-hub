@@ -164,7 +164,11 @@ export type Database = {
           is_active: boolean | null
           location: string | null
           name: string
+          parent_class_id: string | null
           points_reward: number | null
+          recurrence_days: number[] | null
+          recurrence_end_date: string | null
+          recurrence_type: string | null
           scheduled_at: string
         }
         Insert: {
@@ -177,7 +181,11 @@ export type Database = {
           is_active?: boolean | null
           location?: string | null
           name: string
+          parent_class_id?: string | null
           points_reward?: number | null
+          recurrence_days?: number[] | null
+          recurrence_end_date?: string | null
+          recurrence_type?: string | null
           scheduled_at: string
         }
         Update: {
@@ -190,10 +198,22 @@ export type Database = {
           is_active?: boolean | null
           location?: string | null
           name?: string
+          parent_class_id?: string | null
           points_reward?: number | null
+          recurrence_days?: number[] | null
+          recurrence_end_date?: string | null
+          recurrence_type?: string | null
           scheduled_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fitness_classes_parent_class_id_fkey"
+            columns: ["parent_class_id"]
+            isOneToOne: false
+            referencedRelation: "fitness_classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       point_transactions: {
         Row: {
