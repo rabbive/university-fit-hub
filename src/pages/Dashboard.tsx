@@ -313,36 +313,58 @@ const Dashboard = () => {
         </div>
 
         {/* Secondary Actions */}
-        <div className="grid sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          <Link to="/gym-occupancy" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
+            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+              <Users className="w-5 h-5 text-accent" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Gym Status</h3>
+              <p className="text-xs text-muted-foreground">Live occupancy</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          
+          <Link to="/workout/history" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
+            <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-warning" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">History</h3>
+              <p className="text-xs text-muted-foreground">Past workouts</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+          
           <Link to="/achievements" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Medal className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1">
               <h3 className="font-medium text-foreground">Achievements</h3>
-              <p className="text-xs text-muted-foreground">View your badges</p>
+              <p className="text-xs text-muted-foreground">View badges</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </Link>
           
           <Link to="/challenges" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Swords className="w-5 h-5 text-accent" />
+            <div className="w-10 h-10 rounded-lg bg-energy/10 flex items-center justify-center">
+              <Swords className="w-5 h-5 text-energy" />
             </div>
             <div className="flex-1">
               <h3 className="font-medium text-foreground">Challenges</h3>
-              <p className="text-xs text-muted-foreground">Join active challenges</p>
+              <p className="text-xs text-muted-foreground">Join challenges</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </Link>
           
           <Link to="/profile" className="glass-hover rounded-xl p-4 flex items-center gap-3 border border-border/50">
-            <div className="w-10 h-10 rounded-lg bg-energy/10 flex items-center justify-center">
-              <User className="w-5 h-5 text-energy" />
+            <div className="w-10 h-10 rounded-lg bg-muted/50 flex items-center justify-center">
+              <User className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="flex-1">
               <h3 className="font-medium text-foreground">Profile</h3>
-              <p className="text-xs text-muted-foreground">Edit your settings</p>
+              <p className="text-xs text-muted-foreground">Settings</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </Link>

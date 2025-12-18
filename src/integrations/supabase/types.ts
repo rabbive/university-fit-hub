@@ -215,6 +215,57 @@ export type Database = {
           },
         ]
       }
+      gym_hourly_stats: {
+        Row: {
+          avg_occupancy: number | null
+          day_of_week: number
+          hour_of_day: number
+          id: string
+          sample_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_occupancy?: number | null
+          day_of_week: number
+          hour_of_day: number
+          id?: string
+          sample_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_occupancy?: number | null
+          day_of_week?: number
+          hour_of_day?: number
+          id?: string
+          sample_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gym_occupancy: {
+        Row: {
+          check_in_time: string
+          check_out_time: string | null
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          check_in_time?: string
+          check_out_time?: string | null
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          check_in_time?: string
+          check_out_time?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       point_transactions: {
         Row: {
           created_at: string | null
