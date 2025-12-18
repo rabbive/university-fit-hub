@@ -19,6 +19,7 @@ import Challenges from "./pages/Challenges";
 import Profile from "./pages/Profile";
 import GymOccupancy from "./pages/GymOccupancy";
 import WorkoutHistory from "./pages/WorkoutHistory";
+import BuddyMatching from "./pages/BuddyMatching";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/gym-occupancy" element={<GymOccupancy />} />
+          <Route path="/buddy-matching" element={<BuddyMatching />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

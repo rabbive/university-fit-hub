@@ -47,6 +47,72 @@ export type Database = {
         }
         Relationships: []
       }
+      buddy_connections: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          receiver_id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          receiver_id: string
+          requester_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          receiver_id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      buddy_preferences: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          looking_for_buddy: boolean | null
+          preferred_days: number[] | null
+          preferred_times: string[] | null
+          updated_at: string
+          user_id: string
+          workout_types: string[] | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          looking_for_buddy?: boolean | null
+          preferred_days?: number[] | null
+          preferred_times?: string[] | null
+          updated_at?: string
+          user_id: string
+          workout_types?: string[] | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          looking_for_buddy?: boolean | null
+          preferred_days?: number[] | null
+          preferred_times?: string[] | null
+          updated_at?: string
+          user_id?: string
+          workout_types?: string[] | null
+        }
+        Relationships: []
+      }
       challenge_participants: {
         Row: {
           challenge_id: string
@@ -261,6 +327,36 @@ export type Database = {
           check_in_time?: string
           check_out_time?: string | null
           created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          achievement_alerts: boolean | null
+          buddy_requests: boolean | null
+          class_reminders: boolean | null
+          created_at: string
+          email: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_alerts?: boolean | null
+          buddy_requests?: boolean | null
+          class_reminders?: boolean | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_alerts?: boolean | null
+          buddy_requests?: boolean | null
+          class_reminders?: boolean | null
+          created_at?: string
+          email?: string | null
           id?: string
           user_id?: string
         }
