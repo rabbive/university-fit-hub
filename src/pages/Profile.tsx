@@ -19,10 +19,11 @@ import {
   Save,
   Loader2,
   Trophy,
-  Flame,
   Target,
-  Calendar
+  Calendar,
+  Bell
 } from "lucide-react";
+import { PushNotificationSettings } from "@/components/PushNotificationSettings";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface ProfileData {
@@ -306,6 +307,15 @@ const Profile = () => {
               )}
             </Button>
           </div>
+        </div>
+
+        {/* Push Notifications */}
+        <div className="glass rounded-2xl p-6 mt-6 border border-border/50">
+          <h3 className="font-display text-lg font-semibold mb-4 text-foreground flex items-center gap-2">
+            <Bell className="w-5 h-5 text-primary" />
+            Notifications
+          </h3>
+          <PushNotificationSettings userId={user?.id || null} />
         </div>
 
         {/* Account Info */}
