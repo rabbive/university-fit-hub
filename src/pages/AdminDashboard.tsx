@@ -234,13 +234,13 @@ const AdminDashboard = () => {
         <div className="mb-8">
           <h2 className="font-display text-xl font-semibold mb-4 text-foreground">Quick Actions</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
+            <Link to="/admin/classes" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                 <Plus className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="font-semibold mb-1 text-foreground">Add Class</h3>
-              <p className="text-sm text-muted-foreground">Create a new fitness class</p>
-            </button>
+              <h3 className="font-semibold mb-1 text-foreground">Manage Classes</h3>
+              <p className="text-sm text-muted-foreground">Add, edit, delete fitness classes</p>
+            </Link>
             
             <Link to="/admin/users" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
@@ -250,13 +250,13 @@ const AdminDashboard = () => {
               <p className="text-sm text-muted-foreground">View and manage members</p>
             </Link>
             
-            <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
+            <Link to="/admin/analytics" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-energy/10 flex items-center justify-center mb-4 group-hover:bg-energy/20 transition-colors">
                 <BarChart3 className="w-6 h-6 text-energy" />
               </div>
               <h3 className="font-semibold mb-1 text-foreground">Analytics</h3>
               <p className="text-sm text-muted-foreground">View detailed reports</p>
-            </button>
+            </Link>
             
             <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center mb-4 group-hover:bg-warning/20 transition-colors">
@@ -271,11 +271,11 @@ const AdminDashboard = () => {
         {/* Info Banner */}
         <div className="glass rounded-2xl p-8 text-center border border-primary/20">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-4">
-            <Settings className="w-8 h-8 text-primary-foreground" />
+            <Dumbbell className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h3 className="font-display text-xl font-semibold mb-2 text-foreground">Admin Panel</h3>
+          <h3 className="font-display text-xl font-semibold mb-2 text-foreground">Welcome to Admin Panel</h3>
           <p className="text-muted-foreground max-w-md mx-auto">
-            Full admin features including class management, user management, and analytics are coming soon.
+            Use the quick actions above to manage classes, users, and view analytics for your fitness club.
           </p>
         </div>
       </main>
