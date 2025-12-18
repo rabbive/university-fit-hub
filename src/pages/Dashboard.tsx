@@ -192,13 +192,13 @@ const Dashboard = () => {
               <p className="text-sm text-muted-foreground">See how you rank</p>
             </button>
             
-            <button className="glass-hover rounded-2xl p-6 text-left group">
+            <Link to="/ai-planner" className="glass-hover rounded-2xl p-6 text-left group">
               <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center mb-4 group-hover:bg-warning/20 transition-colors">
                 <Sparkles className="w-6 h-6 text-warning" />
               </div>
               <h3 className="font-semibold mb-1">AI Planner</h3>
               <p className="text-sm text-muted-foreground">Get personalized workouts</p>
-            </button>
+            </Link>
           </div>
         </div>
 
