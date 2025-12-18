@@ -10,7 +10,8 @@ import {
   BarChart3,
   Settings,
   Plus,
-  ShieldAlert
+  ShieldAlert,
+  ClipboardList
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User } from "@supabase/supabase-js";
@@ -258,9 +259,23 @@ const AdminDashboard = () => {
               <p className="text-sm text-muted-foreground">View detailed reports</p>
             </Link>
             
-            <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
+            <Link to="/admin/bookings" className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
               <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center mb-4 group-hover:bg-warning/20 transition-colors">
-                <Settings className="w-6 h-6 text-warning" />
+                <ClipboardList className="w-6 h-6 text-warning" />
+              </div>
+              <h3 className="font-semibold mb-1 text-foreground">Bookings</h3>
+              <p className="text-sm text-muted-foreground">Manage class bookings</p>
+            </Link>
+          </div>
+        </div>
+
+        {/* Secondary Actions */}
+        <div className="mb-8">
+          <h2 className="font-display text-xl font-semibold mb-4 text-foreground">More Options</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button className="glass-hover rounded-2xl p-6 text-left group border border-border/50">
+              <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-4 group-hover:bg-muted transition-colors">
+                <Settings className="w-6 h-6 text-muted-foreground" />
               </div>
               <h3 className="font-semibold mb-1 text-foreground">Settings</h3>
               <p className="text-sm text-muted-foreground">Configure system settings</p>
